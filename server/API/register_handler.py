@@ -2,7 +2,7 @@ import json
 
 from werkzeug import Response
 from flask import redirect, request
-from auth.server.db import db_handler
+from auth.server.db import db_handler, User
 from .tools import process_redirect_url
 from .app import app
 
@@ -19,17 +19,20 @@ def check_password_requirements(password: str) -> bool:
 
 @app.route('/register', methods=['POST'])
 def register() -> Response:
-    username = request.args.get('username')
+    login = request.args.get('login')
     password = request.args.get('password')
-    client_id = request.args.get('client_id')
+    name = request.args.get('name')
+    second_name = request.args.get('second_name')
+    role = request.args.get('role')
+
     redirect_url = request.args.get('redirect_url')
 
-    if None in [username, password, client_id, redirect_url]:
+    if None in [login, password, name, second_name, role, redirect_url]:
         return Response(json.dumps({
             "error": "invalid_request"
         }), 400)
 
-    if not db_handler.verify_new_login(username):
+    if not db_handler.verify_new_login(login):
         return Response(json.dumps({
             "error": "invalid_username"
         }), 405)
@@ -39,10 +42,10 @@ def register() -> Response:
             "error": "invalid_password"
         }), 405)
 
-    db_handler.register_new_user(username, password)
+    user = User(login=login, password=password, name=name, second_name=second_name, role=role)
+    db_handler.register_new_user(user)
 
     # redirect to signin
     return redirect(process_redirect_url(redirect_url, {
-        'client_id': client_id,
         'redirect_url': redirect_url
     }), code=303)

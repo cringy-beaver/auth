@@ -6,7 +6,7 @@ from .token_status_enum import TokenStatusEnum
 ISSUER = 'godoV_Ztepan'
 PRIVATE_KEY_PATH = 'tokens/keys/private.pem'  # Прикрутить папку с ключами к проекту
 PUBLIC_KEY_PATH = 'tokens/keys/public.pem'  # Прикрутить папку с ключами к проекту
-JWT_LIFE_SPAN = 60  # 1 hour
+JWT_LIFE_SPAN = 60 * 60  # 1 hour
 JWT_UPDATE_THRESHOLD = JWT_LIFE_SPAN // 2  # 30 minutes
 
 TOKENS_DEADLINE: dict[str, float] = {}

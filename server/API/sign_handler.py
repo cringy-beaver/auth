@@ -3,7 +3,7 @@ import json
 from werkzeug import Response
 from flask import redirect, request
 from .tools import process_redirect_url
-from auth.server.db import db_handler
+from auth.server.db import db_handler, User
 from auth.server.tokens.token_handler import generate_next_access_token, JWT_UPDATE_THRESHOLD
 
 from .app import app
@@ -11,27 +11,28 @@ from .app import app
 
 @app.route('/signin', methods=['POST'])
 def signin() -> Response:
-    username = request.args.get('username')
+    login = request.args.get('login')
     password = request.args.get('password')
-    client_id = request.args.get('client_id')
+    role = request.args.get('role')
+
     redirect_url = request.args.get('redirect_url')
 
-    if None in [username, password, client_id, redirect_url]:
+    if None in [login, password, role, redirect_url]:
         return Response(json.dumps({
             "error": "invalid_request"
         }), 400)
 
-    if not db_handler.verify_client_info(client_id, redirect_url):
-        return Response(json.dumps({
-            "error": "invalid_client"
-        }), 401)
+    user = User(login=login, password=password, role=role)
 
-    if not db_handler.authenticate_user_credentials(username, password):
+    existed_user = db_handler.authenticate_user_credentials(user)
+
+    if existed_user is None:
         return Response(json.dumps({
             'error': 'access_denied'
         }), 401)
 
     access_token = generate_next_access_token()
+    db_handler.create_new_token_owner(existed_user, access_token)
 
     return redirect(process_redirect_url(redirect_url, {
         'access_token': access_token,
