@@ -1,42 +1,89 @@
 from .user import User
+import db_api
 
-token_owner: dict[str, User] = {}
+token_to_owner: dict[str, User] = {}
+owner_to_token: dict[User, str] = {}
 
 
-def authenticate_user_credentials(user: User) -> User:
-    test_user = User(
-        name='John',
-        second_name='Doe',
-        role='admin',
-        _id=1
+def authenticate_user_credentials(user: User) -> User | None:
+    users = db_api.select_all_query_execute(
+        {
+            'login': user.login,
+            'password': user.password,
+            'role': user.role
+        },
+        db_api.storage_auf_name
     )
 
-    return test_user
+    if users is None:
+        return None
+
+    if len(users) > 1:
+        raise Exception('Multiple users with same credentials')
+
+    existing_user = User(**users[0])
+
+    return existing_user
 
 
 def verify_new_login(login: str) -> bool:
-    return True
+    users = db_api.select_all_query_execute(
+        {'login': login},
+        db_api.storage_auf_name
+    )
+
+    if users is None:
+        return True
+
+    return False
 
 
-def register_new_user(user: User) -> bool:
-    return True
+def generate_id() -> int:   # TODO: implement
+    return ...
+
+
+def register_new_user(user: User) -> None:
+    id = generate_id()
+    db_api.insert_query_execute(
+        {
+            'login': user.login,
+            'password': user.password,
+            'name': user.name,
+            'second_name': user.second_name,
+            'role': user.role,
+            'id': id
+        },
+        db_api.storage_auf_name
+    )
 
 
 def update_token_owner(old_token: str, new_token: str) -> None:
-    user = token_owner[old_token]
-    del token_owner[old_token]
-    token_owner[new_token] = user
+    user = token_to_owner[old_token]
+    del token_to_owner[old_token]
+    del owner_to_token[user]
+    token_to_owner[new_token] = user
+    owner_to_token[user] = new_token
 
 
 def create_new_token_owner(user: User, token: str) -> None:
-    token_owner[token] = user
+    token_to_owner[token] = user
+    owner_to_token[user] = token
 
 
 def delete_token_owner(token: str) -> None:
-    if token not in token_owner:
+    if token not in token_to_owner:
         return
-    del token_owner[token]
+    user = token_to_owner[token]
+    del token_to_owner[token]
+    del owner_to_token[user]
 
 
 def get_token_owner(token: str) -> User:
-    return token_owner[token]
+    return token_to_owner[token]
+
+
+def get_token_by_owner(user: User) -> str | None:
+    if user not in owner_to_token:
+        return None
+
+    return owner_to_token[user]

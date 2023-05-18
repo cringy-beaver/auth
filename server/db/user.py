@@ -15,3 +15,12 @@ class User:
             'role': self.role,
             'id': self.id
         }
+
+    def __eq__(self, other):
+        if not isinstance(other, User):
+            return False
+
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
