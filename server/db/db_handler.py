@@ -1,6 +1,9 @@
 from .user import User
 import db_api
 
+from hashlib import sha256
+from datetime import datetime
+
 token_to_owner: dict[str, User] = {}
 owner_to_token: dict[User, str] = {}
 
@@ -9,7 +12,7 @@ def authenticate_user_credentials(user: User) -> User | None:
     users = db_api.select_all_query_execute(
         {
             'login': user.login,
-            'password': user.password,
+            'password': user.hash_password,
             'role': user.role
         },
         db_api.storage_auf_name
@@ -38,16 +41,27 @@ def verify_new_login(login: str) -> bool:
     return False
 
 
-def generate_id() -> int:   # TODO: implement
-    return ...
+def generate_id(user: User) -> str:
+    user_str = user.str_to_gen_id()
+    new_id = sha256(f'{user_str}{str(datetime.now())}'.encode()).hexdigest()
+
+    json = {
+        'id': new_id
+    }
+
+    while db_api.select_all_query_execute(json, db_api.storage_auf_name) is not None:
+        new_id = sha256(f'{user_str}{str(datetime.now())}'.encode()).hexdigest()
+        json['id'] = new_id
+
+    return new_id
 
 
 def register_new_user(user: User) -> None:
-    id = generate_id()
+    id = generate_id(user)
     db_api.insert_query_execute(
         {
             'login': user.login,
-            'password': user.password,
+            'password': user.hash_password,
             'name': user.name,
             'second_name': user.second_name,
             'role': user.role,

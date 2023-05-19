@@ -2,7 +2,7 @@ import sqlalchemy
 
 
 storage_ref = ''
-storage_auf_name = ''
+storage_auf_name = ''   # auf
 engine = sqlalchemy.create_engine(storage_ref)
 
 
