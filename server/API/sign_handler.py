@@ -14,16 +14,15 @@ from .app import app
 def signin() -> Response:
     login = request.args.get('login')
     password = request.args.get('password')
-    role = request.args.get('role')
 
     redirect_url = request.args.get('redirect_url')
 
-    if None in [login, password, role, redirect_url]:
+    if None in [login, password, redirect_url]:
         return Response(json.dumps({
             "error": "invalid_request"
         }), 400)
 
-    user = User(login=login, password=password, role=role)
+    user = User(login=login, password=password)
 
     existed_user = db_handler.authenticate_user_credentials(user)
 

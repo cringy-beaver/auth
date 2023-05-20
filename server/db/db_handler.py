@@ -1,5 +1,5 @@
 from .user import User
-import db_api
+from . import db_api
 
 from hashlib import sha256
 from datetime import datetime
@@ -12,8 +12,7 @@ def authenticate_user_credentials(user: User) -> User | None:
     users = db_api.select_all_query_execute(
         {
             'login': user.login,
-            'password': user.hash_password,
-            'role': user.role
+            'password': user.hash_password
         },
         db_api.storage_auf_name
     )
