@@ -14,7 +14,7 @@ def authenticate_user_credentials(user: User) -> User | None:
             'login': user.login,
             'password': user.hash_password
         },
-        db_api.storage_auf_name
+        db_api.storage_auth_name
     )
 
     if users is None:
@@ -31,7 +31,7 @@ def authenticate_user_credentials(user: User) -> User | None:
 def verify_new_login(login: str) -> bool:
     users = db_api.select_all_query_execute(
         {'login': login},
-        db_api.storage_auf_name
+        db_api.storage_auth_name
     )
 
     if users is None:
@@ -48,7 +48,7 @@ def generate_id(user: User) -> str:
         'id': new_id
     }
 
-    while db_api.select_all_query_execute(json, db_api.storage_auf_name) is not None:
+    while db_api.select_all_query_execute(json, db_api.storage_auth_name) is not None:
         new_id = sha256(f'{user_str}{str(datetime.now())}'.encode()).hexdigest()
         json['id'] = new_id
 
@@ -66,7 +66,7 @@ def register_new_user(user: User) -> None:
             'role': user.role,
             'id': id
         },
-        db_api.storage_auf_name
+        db_api.storage_auth_name
     )
 
 
