@@ -1,9 +1,8 @@
 import json
 
 from werkzeug import Response
-from flask import redirect, request
-from auth.server.db import db_handler, User
-from .tools import process_redirect_url
+from flask import request
+from ..db import db_handler, User
 from .app import app
 
 
@@ -25,9 +24,7 @@ def register() -> Response:
     second_name = request.args.get('second_name')
     role = request.args.get('role')
 
-    redirect_url = request.args.get('redirect_url')
-
-    if None in [login, password, name, second_name, role, redirect_url]:
+    if None in [login, password, name, second_name, role]:
         return Response(json.dumps({
             "error": "invalid_request"
         }), 400)
@@ -45,7 +42,6 @@ def register() -> Response:
     user = User(login=login, password=password, name=name, second_name=second_name, role=role)
     db_handler.register_new_user(user)
 
-    # redirect to signin
-    return redirect(process_redirect_url(redirect_url, {
-        'redirect_url': redirect_url
-    }), code=303)
+    return Response(json.dumps({
+        "status": "ok"
+    }), 200)

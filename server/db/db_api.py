@@ -2,8 +2,8 @@ import sqlalchemy
 import os
 
 
-storage_ref = os.environ.get('STORAGE_REF')
-storage_auth_name = os.environ.get('STORAGE_AUTH_NAME')
+storage_ref = os.getenv('STORAGE_REF')
+storage_auth_name = os.getenv('STORAGE_AUTH_NAME')
 engine = sqlalchemy.create_engine(storage_ref)
 
 

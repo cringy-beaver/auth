@@ -2,9 +2,9 @@ import json
 
 from werkzeug import Response
 from flask import request
-from auth.server.tokens.token_handler import update_access_token
-from auth.server.tokens.token_status_enum import TokenStatusEnum
-from auth.server.db import db_handler
+from ..tokens.token_handler import update_access_token
+from ..tokens.token_status_enum import TokenStatusEnum
+from ..db import db_handler
 
 from .app import app
 

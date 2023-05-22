@@ -2,7 +2,7 @@ import json
 
 from werkzeug import Response
 from flask import request
-from auth.server.db import db_handler
+from ..db import db_handler
 from .update_token_handler import _update_token
 
 from .app import app
