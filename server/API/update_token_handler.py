@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from werkzeug import Response
 from flask import request
@@ -22,20 +23,22 @@ def update_token() -> Response:
 
 
 def _update_token(token: str) -> Response:
-    response, new_token, time_left = update_access_token(token)
+    response, new_token, time_create, ttl = update_access_token(token)
 
     if response == TokenStatusEnum.NOT_CHANGED:
         return Response(json.dumps({
             "status": "not_changed",
             "token": new_token,
-            "time_left": time_left
+            "time_create": time_create.strftime('%Y-%m-%d %H:%M:%S'),
+            "ttl": ttl
         }), 200)
     if response == TokenStatusEnum.UPDATED:
         db_handler.update_token_owner(token, new_token)
         return Response(json.dumps({
             "status": "updated",
             "token": new_token,
-            "time_left": time_left
+            "time_create": time_create.strftime('%Y-%m-%d %H:%M:%S'),
+            "ttl": ttl
         }), 200)
     if response == TokenStatusEnum.EXPIRED:
         db_handler.delete_token_owner(token)

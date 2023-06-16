@@ -32,6 +32,7 @@ def signin() -> Response:
 
     if existed_token is not None:
         response = _update_token(existed_token)
+        response_data = json.loads(response.data.decode('utf-8'))
 
         if response.status_code == 200:
             return Response(
@@ -39,7 +40,8 @@ def signin() -> Response:
                     {
                         'access_token': existed_token,
                         'token_type': 'JWT',
-                        'time_left': json.loads(response.data)['time_left'],
+                        'time_create': response_data['time_create'],
+                        'ttl': response_data['ttl'],
                         'user': existed_user.to_json()
                     }
                 ),
@@ -48,14 +50,15 @@ def signin() -> Response:
 
         db_handler.delete_token_owner(existed_token)
 
-    access_token = generate_next_access_token()
+    time_create, access_token = generate_next_access_token()
     db_handler.create_new_token_owner(existed_user, access_token)
 
     return Response(
         json.dumps({
             'access_token': access_token,
             'token_type': 'JWT',
-            'time_left': JWT_UPDATE_THRESHOLD,
+            'time_create': time_create.strftime('%Y-%m-%d %H:%M:%S'),
+            'ttl': JWT_UPDATE_THRESHOLD,
             'user': existed_user.to_json()
         }),
         200

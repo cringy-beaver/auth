@@ -36,5 +36,6 @@ def get_user_info() -> Response:
         "user": user.to_json(),
         "token_status": update_response["status"],
         "token": update_response["token"],
-        "time_left": update_response["time_left"]
+        "time_create": update_response["time_create"],
+        "ttl": update_response["ttl"],
     }), 200)
